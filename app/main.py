@@ -14,12 +14,14 @@ app = FastAPI()
 # Create directories if they don't exist
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
+os.makedirs("app/static", exist_ok=True)  # Ensure static dir exists
 
 # Setup templates
 templates = Jinja2Templates(directory="app/templates")
 
-# Serve static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Serve static files - use absolute path with current working directory
+static_dir = os.path.join(os.getcwd(), "app/static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_root(request: Request):
