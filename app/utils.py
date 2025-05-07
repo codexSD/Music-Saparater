@@ -1,6 +1,7 @@
 import subprocess
 import os
 from pathlib import Path
+import torch
 
 def extract_audio(video_path, audio_path):
     """
@@ -51,13 +52,19 @@ def run_demucs(audio_path, output_dir):
         audio_path (str): Path to the audio file
         output_dir (str): Directory where separated tracks will be saved
     """
+    # Check if CUDA is available
+    device_arg = ["--device", "cuda"] if torch.cuda.is_available() else []
+    
+    # Use higher-quality separation for better results when GPU is available
+    model_arg = ["--model", "htdemucs_ft"]
+    
     cmd = [
         "demucs",
         "--two-stems=vocals",
         "-o", output_dir,
-        audio_path
-    ]
+    ] + device_arg + model_arg + [audio_path]
     
+    print(f"Running Demucs with command: {' '.join(cmd)}")
     subprocess.run(cmd, check=True)
 
 def get_demucs_outputs(output_dir, file_stem):
@@ -71,8 +78,17 @@ def get_demucs_outputs(output_dir, file_stem):
     Returns:
         tuple: (vocals_path, no_vocals_path)
     """
-    # Demucs creates a 'htdemucs' directory by default
-    model_dir = os.path.join(output_dir, "htdemucs")
+    # Check which model folder exists (htdemucs or htdemucs_ft)
+    model_dirs = ["htdemucs_ft", "htdemucs"]
+    model_dir = None
+    
+    for dir_name in model_dirs:
+        if os.path.exists(os.path.join(output_dir, dir_name)):
+            model_dir = os.path.join(output_dir, dir_name)
+            break
+    
+    if not model_dir:
+        raise Exception("No output found from Demucs processing")
     
     # Get the exact file name from the Demucs output directory
     file_dirs = os.listdir(model_dir)

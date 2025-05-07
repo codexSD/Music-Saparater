@@ -12,4 +12,11 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./outputs:/app/outputs
-    restart: unless-stopped 
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu] 

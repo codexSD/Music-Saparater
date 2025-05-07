@@ -3,9 +3,9 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install FFmpeg and Git
+# Install FFmpeg, Git, and CUDA dependencies
 RUN apt-get update && \
-    apt-get install -y ffmpeg git && \
+    apt-get install -y ffmpeg git wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -21,8 +21,10 @@ COPY app/ ./app/
 # Create necessary directories
 RUN mkdir -p uploads outputs app/static
 
-# Set environment variable for Demucs to avoid CUDA errors
-ENV CONDA_OVERRIDE_CUDA=11.8
+# Set environment variables for GPU acceleration
+ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+ENV CUDA_VISIBLE_DEVICES=0
+ENV TORCH_AUDIOMENTATIONS_DATA_DIR=/tmp
 
 # Expose port for the web server
 EXPOSE 8000
