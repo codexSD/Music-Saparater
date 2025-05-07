@@ -6,6 +6,8 @@ import os
 import uuid
 import shutil
 from pathlib import Path
+from typing import Optional
+import json
 
 from app.utils import extract_audio, combine_audio_video, run_demucs, get_demucs_outputs
 
@@ -30,7 +32,10 @@ async def get_root(request: Request):
 @app.post("/process")
 async def process_file(
     file: UploadFile = File(...),
-    isolation_type: str = Form(...)
+    isolation_type: str = Form(...),
+    quality: Optional[str] = Form(None),
+    noise_reduction: Optional[str] = Form(None),
+    stem_balance: Optional[str] = Form(None)
 ):
     # Generate unique ID for file processing
     process_id = str(uuid.uuid4())
@@ -59,6 +64,34 @@ async def process_file(
     with open(upload_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
+    # Process advanced settings
+    process_options = {}
+    
+    if quality:
+        try:
+            quality_value = int(quality)
+            if quality_value <= 25:
+                process_options["quality"] = "fast"
+            elif quality_value <= 50:
+                process_options["quality"] = "medium"
+            elif quality_value <= 75:
+                process_options["quality"] = "better"
+            else:
+                process_options["quality"] = "best"
+        except ValueError:
+            process_options["quality"] = "better"  # Default
+    
+    if noise_reduction and noise_reduction.lower() == "true":
+        process_options["noise_reduction"] = True
+    
+    if stem_balance:
+        try:
+            balance_value = int(stem_balance)
+            if balance_value != 0:
+                process_options["stem_balance"] = balance_value / 100  # Convert to decimal
+        except ValueError:
+            pass
+    
     try:
         # Extract audio if video file
         if is_video:
@@ -67,8 +100,8 @@ async def process_file(
             # If audio file, use it directly
             audio_path = upload_path
         
-        # Run Demucs
-        run_demucs(audio_path, output_dir)
+        # Run Demucs with options
+        run_demucs(audio_path, output_dir, process_options)
         
         # Get vocal and no_vocal paths
         vocal_path, no_vocal_path = get_demucs_outputs(output_dir, Path(audio_path).stem)

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocal & Music Separator</title>
+    <title>Vocal & Music Separator - AI-Powered Audio Processing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -141,143 +143,203 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vocal & Music Separator</h1>
-        
-        <form id="uploadForm">
-            <div class="form-group">
-                <label>Select what to isolate:</label>
-                <div class="options">
-                    <div class="option selected" data-value="vocals">
-                        <h3>Vocals Only</h3>
-                        <p>Remove background music and keep just the vocals</p>
+        <div class="header">
+            <h1>Vocal & Music Separator</h1>
+            <p>AI-powered tool that separates vocals from music in your audio and video files</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-target="processingTab">
+                    <i class="fas fa-music"></i> Process Audio
+                </button>
+                <button class="tab-btn" data-target="historyTab">
+                    <i class="fas fa-history"></i> History
+                </button>
+                <button class="tab-btn" data-target="batchTab">
+                    <i class="fas fa-layer-group"></i> Batch Process
+                </button>
+            </div>
+            
+            <!-- Processing Tab -->
+            <div id="processingTab" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Separate Vocals and Music</h2>
                     </div>
-                    <div class="option" data-value="music">
-                        <h3>Music Only</h3>
-                        <p>Remove vocals and keep just the instrumental music</p>
+                    <div class="card-body">
+                        <div class="info-message info">
+                            <i class="fas fa-info-circle icon"></i>
+                            <div>
+                                <strong>100% Private Processing</strong>
+                                <p>Your files never leave your computer. All processing happens locally with AI.</p>
+                            </div>
+                        </div>
+                        
+                        <form id="uploadForm">
+                            <!-- Option Selection -->
+                            <div class="form-group">
+                                <label class="form-label">What do you want to isolate?</label>
+                                <div class="option-cards">
+                                    <div class="option-card selected" data-value="vocals">
+                                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                                        <i class="fas fa-microphone icon"></i>
+                                        <h3>Vocals Only</h3>
+                                        <p>Isolate human voice and remove background music</p>
+                                    </div>
+                                    <div class="option-card" data-value="music">
+                                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                                        <i class="fas fa-music icon"></i>
+                                        <h3>Music Only</h3>
+                                        <p>Remove vocals and keep just the instrumental music</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="isolation_type" id="isolationType" value="vocals">
+                            </div>
+                            
+                            <!-- File Upload -->
+                            <div class="form-group">
+                                <label class="form-label">Upload Audio or Video File</label>
+                                <div id="fileDropArea" class="file-drop-area">
+                                    <i class="fas fa-cloud-upload-alt icon"></i>
+                                    <h3>Drag & Drop File Here</h3>
+                                    <p>or click to browse files</p>
+                                    <p class="supported-formats">Supported formats: MP3, WAV, MP4, MKV, MOV</p>
+                                    <input type="file" id="fileInput" name="file" accept=".mp3,.wav,.mp4,.mkv,.mov" style="display: none;">
+                                </div>
+                                
+                                <div id="fileInfo" class="file-info">
+                                    <i class="fas fa-file-audio file-icon"></i>
+                                    <div class="file-details">
+                                        <div id="fileName" class="file-name">filename.mp3</div>
+                                        <div id="fileSize" class="file-size">4.2 MB</div>
+                                    </div>
+                                    <i id="removeFile" class="fas fa-times remove-file"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Advanced Settings -->
+                            <div class="form-group">
+                                <div id="settingsToggle" class="settings-toggle">
+                                    <i class="fas fa-chevron-right icon"></i> Advanced Settings
+                                </div>
+                                <div id="settingsContent" class="settings-content">
+                                    <div id="advancedSettingsForm">
+                                        <!-- Separation Quality -->
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Separation Quality
+                                                <span class="tooltip">
+                                                    <i class="fas fa-question-circle tooltip-icon"></i>
+                                                    <span class="tooltip-text">Higher quality takes more time to process but produces better results</span>
+                                                </span>
+                                            </label>
+                                            <div class="slider-container">
+                                                <input type="range" id="qualitySlider" class="slider" min="25" max="100" step="25" value="75">
+                                                <div id="qualityValue" class="slider-value">75%</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Noise Reduction -->
+                                        <div class="form-check">
+                                            <input type="checkbox" id="noiseReductionCheck" class="form-check-input" checked>
+                                            <label for="noiseReductionCheck" class="form-check-label">
+                                                Apply Noise Reduction
+                                                <span class="tooltip">
+                                                    <i class="fas fa-question-circle tooltip-icon"></i>
+                                                    <span class="tooltip-text">Reduces background noise in separated vocals</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Stem Balance -->
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Stem Balance
+                                                <span class="tooltip">
+                                                    <i class="fas fa-question-circle tooltip-icon"></i>
+                                                    <span class="tooltip-text">Adjust balance between vocals and music in the output</span>
+                                                </span>
+                                            </label>
+                                            <div class="slider-container">
+                                                <input type="range" id="stemBalanceSlider" class="slider" min="-50" max="50" value="0">
+                                                <div id="stemBalanceValue" class="slider-value">Balanced</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" id="processBtn" class="btn btn-lg btn-block" disabled>
+                                <i class="fas fa-cogs"></i> Process File
+                            </button>
+                        </form>
+                        
+                        <!-- Progress -->
+                        <div id="progressArea" class="progress-area">
+                            <div class="progress-bar-container">
+                                <div id="progressBar" class="progress-bar"></div>
+                            </div>
+                            <div id="statusText" class="status-text">Processing...</div>
+                        </div>
+                        
+                        <!-- Download -->
+                        <div id="downloadArea" class="download-area">
+                            <i class="fas fa-check-circle download-icon"></i>
+                            <div class="download-message">Your file has been processed successfully!</div>
+                            <a href="#" id="downloadLink" class="btn btn-success btn-lg">
+                                <i class="fas fa-download"></i> Download Result
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <input type="hidden" name="isolation_type" id="isolationType" value="vocals">
             </div>
             
-            <div class="form-group">
-                <label for="fileInput">Select audio or video file:</label>
-                <input type="file" id="fileInput" name="file" class="file-input" accept=".mp3,.wav,.mp4,.mkv,.mov">
+            <!-- History Tab -->
+            <div id="historyTab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Processing History</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyList" class="history-list">
+                            <!-- History items will be inserted here via JavaScript -->
+                            <div class="no-history">No processing history yet</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <button type="submit" id="processBtn" disabled>Process File</button>
-            
-            <div class="progress" id="progressContainer">
-                <progress id="progressBar" value="0" max="100"></progress>
-                <div class="status" id="statusText">Processing...</div>
+            <!-- Batch Processing Tab -->
+            <div id="batchTab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Batch Processing</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-message warning">
+                            <i class="fas fa-exclamation-triangle icon"></i>
+                            <div>
+                                <strong>Coming Soon</strong>
+                                <p>Batch processing feature will be added in the next update.</p>
+                            </div>
+                        </div>
+                        
+                        <p>This feature will allow you to process multiple files at once. Stay tuned!</p>
+                    </div>
+                </div>
             </div>
-            
-            <div class="download" id="downloadContainer">
-                <a href="#" id="downloadLink">Download Processed File</a>
-            </div>
-            
-            <div class="supported-formats">
-                Supported formats: MP3, WAV, MP4, MKV, MOV
-            </div>
-        </form>
+        </div>
+        
+        <!-- Audio Preview Player (Hidden) -->
+        <audio id="audioPreviewPlayer" controls style="display: none;"></audio>
+        
+        <div class="footer">
+            <p>Powered by Demucs AI Model | <a href="https://github.com/facebookresearch/demucs" target="_blank">GitHub</a></p>
+        </div>
     </div>
     
-    <script>
-        // Select elements
-        const form = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('fileInput');
-        const processBtn = document.getElementById('processBtn');
-        const options = document.querySelectorAll('.option');
-        const isolationType = document.getElementById('isolationType');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const statusText = document.getElementById('statusText');
-        const downloadContainer = document.getElementById('downloadContainer');
-        const downloadLink = document.getElementById('downloadLink');
-        
-        // Enable submit button when file is selected
-        fileInput.addEventListener('change', () => {
-            processBtn.disabled = !fileInput.files.length;
-        });
-        
-        // Handle option selection
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                isolationType.value = option.dataset.value;
-            });
-        });
-        
-        // Handle form submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Show progress
-            progressContainer.style.display = 'block';
-            downloadContainer.style.display = 'none';
-            processBtn.disabled = true;
-            
-            // Create FormData
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('isolation_type', isolationType.value);
-            
-            try {
-                // Fake progress updates (since we don't have real progress from server)
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 5;
-                    if (progress > 95) {
-                        clearInterval(progressInterval);
-                        return;
-                    }
-                    progressBar.value = progress;
-                    statusText.textContent = `Processing... ${progress}%`;
-                }, 1000);
-                
-                // Send request
-                const response = await fetch('/process', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                clearInterval(progressInterval);
-                
-                if (response.ok) {
-                    // Get the filename from the Content-Disposition header if possible
-                    const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = fileInput.files[0].name;
-                    
-                    if (contentDisposition) {
-                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-                        if (filenameMatch && filenameMatch[1]) {
-                            filename = filenameMatch[1];
-                        }
-                    }
-                    
-                    // Convert response to blob
-                    const blob = await response.blob();
-                    
-                    // Create download link
-                    const url = window.URL.createObjectURL(blob);
-                    downloadLink.href = url;
-                    downloadLink.download = filename;
-                    
-                    // Show download section
-                    progressBar.value = 100;
-                    statusText.textContent = 'Processing complete!';
-                    downloadContainer.style.display = 'block';
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Error processing file');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                statusText.textContent = `Error: ${error.message}`;
-            } finally {
-                processBtn.disabled = false;
-            }
-        });
-    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html> 
