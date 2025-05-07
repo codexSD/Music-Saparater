@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocal & Music Separator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option.selected {
+            border-color: #3498db;
+            background-color: #ebf5fb;
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f9f9f9;
+        }
+        
+        .file-input:hover {
+            border-color: #3498db;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        progress {
+            width: 100%;
+            height: 20px;
+        }
+        
+        .status {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .download {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .download a {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .download a:hover {
+            background-color: #27ae60;
+        }
+        
+        .supported-formats {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vocal & Music Separator</h1>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label>Select what to isolate:</label>
+                <div class="options">
+                    <div class="option selected" data-value="vocals">
+                        <h3>Vocals Only</h3>
+                        <p>Remove background music and keep just the vocals</p>
+                    </div>
+                    <div class="option" data-value="music">
+                        <h3>Music Only</h3>
+                        <p>Remove vocals and keep just the instrumental music</p>
+                    </div>
+                </div>
+                <input type="hidden" name="isolation_type" id="isolationType" value="vocals">
+            </div>
+            
+            <div class="form-group">
+                <label for="fileInput">Select audio or video file:</label>
+                <input type="file" id="fileInput" name="file" class="file-input" accept=".mp3,.wav,.mp4,.mkv,.mov">
+            </div>
+            
+            <button type="submit" id="processBtn" disabled>Process File</button>
+            
+            <div class="progress" id="progressContainer">
+                <progress id="progressBar" value="0" max="100"></progress>
+                <div class="status" id="statusText">Processing...</div>
+            </div>
+            
+            <div class="download" id="downloadContainer">
+                <a href="#" id="downloadLink">Download Processed File</a>
+            </div>
+            
+            <div class="supported-formats">
+                Supported formats: MP3, WAV, MP4, MKV, MOV
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        // Select elements
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const processBtn = document.getElementById('processBtn');
+        const options = document.querySelectorAll('.option');
+        const isolationType = document.getElementById('isolationType');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const statusText = document.getElementById('statusText');
+        const downloadContainer = document.getElementById('downloadContainer');
+        const downloadLink = document.getElementById('downloadLink');
+        
+        // Enable submit button when file is selected
+        fileInput.addEventListener('change', () => {
+            processBtn.disabled = !fileInput.files.length;
+        });
+        
+        // Handle option selection
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                isolationType.value = option.dataset.value;
+            });
+        });
+        
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show progress
+            progressContainer.style.display = 'block';
+            downloadContainer.style.display = 'none';
+            processBtn.disabled = true;
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('isolation_type', isolationType.value);
+            
+            try {
+                // Fake progress updates (since we don't have real progress from server)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    if (progress > 95) {
+                        clearInterval(progressInterval);
+                        return;
+                    }
+                    progressBar.value = progress;
+                    statusText.textContent = `Processing... ${progress}%`;
+                }, 1000);
+                
+                // Send request
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                clearInterval(progressInterval);
+                
+                if (response.ok) {
+                    // Get the filename from the Content-Disposition header if possible
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = fileInput.files[0].name;
+                    
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (filenameMatch && filenameMatch[1]) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    // Convert response to blob
+                    const blob = await response.blob();
+                    
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    
+                    // Show download section
+                    progressBar.value = 100;
+                    statusText.textContent = 'Processing complete!';
+                    downloadContainer.style.display = 'block';
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error processing file');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusText.textContent = `Error: ${error.message}`;
+            } finally {
+                processBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html> 

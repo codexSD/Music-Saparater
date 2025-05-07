@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  vocal-remover:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vocal-remover
+    container_name: vocal-remover
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+    restart: unless-stopped 
