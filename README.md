@@ -24,6 +24,12 @@ AI-powered application that separates vocals and music from audio/video files, *
 
 ## 🚀 How to Run
 
+### 🔄 Quick Commands
+
+- **Start**: Double-click `start-app.bat` to launch the application
+- **Stop**: Double-click `stop-app.bat` to shut down the application
+- **Restart**: Double-click `restart-app.bat` to restart without rebuilding (for most code changes)
+
 ### 🏎️ Easy Method (Recommended)
 
 #### On Windows
@@ -33,12 +39,12 @@ When done, close the app by double-clicking on the `stop-app.bat` file.
 #### On macOS/Linux
 Run the application with:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Stop the application with:
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### 🔧 Manual Method
@@ -73,6 +79,16 @@ docker-compose down
    ```
    http://localhost:8000
    ```
+
+## 💻 Development Workflow
+
+The application is set up for efficient development:
+
+1. **Code Changes**: Edit files in the `app/` directory - changes will be applied automatically thanks to the `--reload` flag
+2. **Restart Application**: Use `restart-app.bat` if you need to restart the application without rebuilding
+3. **Rebuild Container**: Only needed when changing dependencies in `requirements.txt` or modifying the Dockerfile
+
+This setup saves a lot of time as you don't need to rebuild the Docker image for code changes!
 
 ## 🔍 How It Works
 

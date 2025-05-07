@@ -9,10 +9,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install Python dependencies (this layer will be cached if requirements.txt doesn't change)
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app files
@@ -29,5 +29,8 @@ ENV TORCH_AUDIOMENTATIONS_DATA_DIR=/tmp
 # Expose port for the web server
 EXPOSE 8000
 
-# Start the FastAPI app
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# The app directory will be mounted as a volume in docker-compose.yml
+# This allows code changes without rebuilding the image
+
+# Start the FastAPI app with reload for development
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 

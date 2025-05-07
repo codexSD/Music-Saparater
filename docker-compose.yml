@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   vocal-remover:
     build:
@@ -12,6 +10,10 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./outputs:/app/outputs
+      - ./app:/app/app  # Mount app directory for live code changes
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
     restart: unless-stopped
     deploy:
       resources:
